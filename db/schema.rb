@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_15_031803) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_25_055958) do
   create_table "policies", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.date "end_date"
@@ -20,4 +20,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_15_031803) do
     t.string "status", default: "pending", null: false
     t.datetime "updated_at", null: false
   end
+
+  create_table "policy_status_events", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "from_status"
+    t.datetime "occurred_at", null: false
+    t.integer "policy_id", null: false
+    t.string "reason"
+    t.string "to_status", null: false
+    t.index ["policy_id", "occurred_at"], name: "index_policy_status_events_on_policy_id_and_occurred_at"
+    t.index ["policy_id"], name: "index_policy_status_events_on_policy_id"
+  end
+
+  add_foreign_key "policy_status_events", "policies"
 end
