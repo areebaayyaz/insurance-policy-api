@@ -66,3 +66,29 @@ AI-assisted development log for the insurance-policy-api project — a running r
 - Commit: `8905d2a` — "Add event-sourced status transitions with audit trail, row-locking, and immutable events"
 
 ---
+
+## 6. Set up RSpec
+
+**Prompt:**
+> Set up RSpec for this Rails 8 project. Add rspec-rails to the Gemfile's development and test group, install it, and initialize the RSpec config. Don't write any tests yet — just get RSpec installed and working, and confirm it runs with an empty suite. Explain what files it creates.
+
+**Produced:**
+- `rspec-rails` added to the `:development, :test` group in `Gemfile`; `bundle install` run to update `Gemfile.lock`
+- `bin/rails generate rspec:install` created `.rspec`, `spec/spec_helper.rb`, and `spec/rails_helper.rb`
+- Verified with `bundle exec rspec` — `0 examples, 0 failures`
+- No test files written; no commit yet (setup only)
+
+---
+
+## 7. Test the event-sourcing feature
+
+**Prompt:**
+> Write RSpec tests for the event-sourcing feature. Cover: (1) a valid status transition creates a PolicyStatusEvent and updates the policy's status, (2) an invalid transition is rejected and writes no event, (3) a persisted PolicyStatusEvent is immutable and raises on update, and (4) recompute_status! rebuilds the policy's status from its event log. Test through the Policies::TransitionStatus service and the models. Keep the tests clear and readable, and explain what each spec asserts. Then run the suite and show me the results.
+
+**Produced:**
+- `spec/services/policies/transition_status_spec.rb` — valid `pending` → `active` transition creates one `PolicyStatusEvent` and updates `policy.status`; an invalid transition from the terminal `cancelled` state writes no event, returns a failed `Result`, and leaves the policy untouched
+- `spec/models/policy_status_event_spec.rb` — a persisted event is `readonly?` and raises `ActiveRecord::ReadOnlyRecord` on `update!`
+- `spec/models/policy_spec.rb` — `recompute_status!` rebuilds status from the event with the latest `occurred_at` (not insertion order), even after the `status` column is force-drifted via `update_column`; a policy with no events is left unchanged
+- Full suite run: 5 examples, 0 failures
+
+---
